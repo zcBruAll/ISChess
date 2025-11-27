@@ -7,7 +7,7 @@ def check_player_defeated(player_color, board):
                 return False
     return True
 
-def move_is_valid(player_order, move, board):
+def move_is_valid(player_order, move, board, debug=False):
     player_color = player_order[1]
     player_team = int(player_order[0])
     other_teams = [int(e) for e in player_order[::3]]
@@ -16,7 +16,8 @@ def move_is_valid(player_order, move, board):
     #   Helper
     def is_free(pos):
         val = board[pos[0], pos[1]]
-        print(val == '' or val is None)
+        if debug:
+            print(val == '' or val is None)
         return val == '' or val is None
 
     def color_at(pos):
@@ -70,35 +71,41 @@ def move_is_valid(player_order, move, board):
     #   Check boundary condition
     if start[0] < 0 or start[0] >= board.shape[0] or \
        start[1] < 0 or start[1] >= board.shape[1]:
-       print("boundary 1")
-       return False
+        if debug:
+            print("boundary 1")
+        return False
 
     #   Check boundary condition
     if end[0] < 0 or end[0] >= board.shape[0] or \
        end[1] < 0 or end[1] >= board.shape[1]:
-       print("boundary 2")
+       if debug:
+            print("boundary 2")
        return False
 
     #   Check piece moved
     if board[start[0], start[1]] in ('', 'X', None):
-        print("piece moved")
+        if debug:
+            print("piece moved")
         return False
 
     piece = board[start[0], start[1]]
     
     #   Moving right color
     if piece.color != player_color:
-        print("right color")
+        if debug:
+            print("right color")
         return False
 
     #   check piece specific rules
     if piece.type == 'p':
         if end[0] != start[0] + 1: #    Pawn always move forward
-            print("forward")
+            if debug:
+                print("forward")
             return False
 
         if end[1] == start[1]:
-            print("free : ", is_free(end))
+            if debug:
+                print("free : ", is_free(end))
             return is_free(end)
         
         if is_free(end):
@@ -106,7 +113,8 @@ def move_is_valid(player_order, move, board):
             return False
         
         #   Capture ?
-        print(team_at(end), "!=", player_team, "==", team_at(end) != player_team)
+        if debug:
+            print(team_at(end), "!=", player_team, "==", team_at(end) != player_team)
         return abs(end[1] - start[1]) == 1 and (not is_free(end)) and team_at(end) != player_team
     elif piece.type == 'n':
         dx = abs(end[0] - start[0])
