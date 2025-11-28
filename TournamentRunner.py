@@ -134,7 +134,7 @@ def play_match(bots: Sequence[Tuple[str, callable]], max_turns: int, time_budget
         except Exception as exc:
             # Any exception counts as a forfeit
             print(f"Bot '{bot_name}' crashed: {exc}")
-            return endMatch(turn, (-1) ** (player + 1))
+            return endMatch(turn + 1, (-1) ** (player + 1))
 
         if not (
             isinstance(proposed_move, tuple) and
@@ -143,17 +143,17 @@ def play_match(bots: Sequence[Tuple[str, callable]], max_turns: int, time_budget
         ):
             # Any invalid move format counts as a forfeit 
             print(f"Bot '{bot_name}' produced an invalid move format: {proposed_move}")
-            return endMatch(turn, (-1) ** (player + 1))
+            return endMatch(turn + 1, (-1) ** (player + 1))
         
         if not move_is_valid(player_seq, proposed_move, player_board):
             print(f"Bot '{bot_name}' played an illegal move: {proposed_move}")
-            return endMatch(turn, (-1) ** (player + 1))
+            return endMatch(turn + 1, (-1) ** (player + 1))
 
         apply_move(board, proposed_move, rotation)
 
         # Opponent got defeated
-        if check_player_defeated(color, player_board):
-            return endMatch(turn, (-1) ** player)
+        if check_player_defeated("w" if color == "b" else "b", player_board):
+            return endMatch(turn + 1, (-1) ** player)
 
     return 0
 
