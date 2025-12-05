@@ -19,6 +19,19 @@ class BoardManager:
         self.pieces = []
         self.load_file(self.DEFAULT_BOARD)
 
+    @staticmethod
+    def get_string_board(board):
+        res = []
+        for r in board:
+            line = []
+            for c in r:
+                if type(c) is str:
+                    line.append(c)
+                else:
+                    line.append(c.string())
+            res.append(line)
+        return res
+
     def post_load(self):
         """
         Callback called after loading a board

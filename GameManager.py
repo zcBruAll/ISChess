@@ -133,7 +133,12 @@ class GameManager:
             return True
 
         self.current_player = ParallelTurn(
-            func, sequence, self.current_player_board, budget, tile_width, tile_height
+            func,
+            sequence,
+            BoardManager.get_string_board(self.current_player_board),
+            budget,
+            tile_width,
+            tile_height,
         )
 
         self.current_player.setTerminationEnabled(True)
