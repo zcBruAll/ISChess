@@ -1,4 +1,4 @@
-from numpy.random.mtrand import Sequence
+from typing import Sequence, Tuple
 
 pawn_moves = [
     (1, 0),
@@ -50,6 +50,10 @@ king_moves = [
     (0, 1),
     (-1, 0),
     (1, 0),
+    (1, 1),
+    (1, -1),
+    (-1, 1),
+    (-1, -1),
 ]
 
 pieces_moves = {
@@ -63,7 +67,26 @@ pieces_moves = {
 
 can_move_k_cases = ["q", "b", "r"]
 
-def get_pieces_moves(position: (int, int), board) -> Sequence[int, int]:
+
+def get_piece_value(piece: str) -> int:
+    match piece:
+        case "p":
+            return 1
+        case "n":
+            return 3
+        case "b":
+            return 3
+        case "r":
+            return 5
+        case "q":
+            return 9
+        case "k":
+            return 10000
+        case _:
+            return 0
+
+
+def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]]:
     # Retrieve the piece to find moves
     piece = board[position[0]][position[1]]
     piece_type = piece[0]
