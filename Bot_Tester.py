@@ -2,10 +2,49 @@ import importlib
 import time
 import numpy as np
 import pytest
+from dataclasses import dataclass
 
 from Bots import __all__ as BOT_MODULES
 from Bots.ChessBotList import CHESS_BOT_LIST
 from ChessRules import move_is_valid, check_player_defeated
+
+
+@dataclass
+class BoardPiece:
+    piece_type: str
+    color: str
+
+    def __post_init__(self) -> None:
+        self.piece_type = self.piece_type.lower()
+        self.color = self.color.lower()
+
+    @property
+    def type(self) -> str:
+        return self.piece_type
+
+    def string(self) -> str:
+        return f"{self.piece_type}{self.color}"
+
+    def __getitem__(self, idx):
+        if isinstance(idx, slice):
+            return self.string()[idx.start : idx.stop : idx.step]
+        return self.string()[idx]
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, str):
+            return self.string() == other
+        return super().__eq__(other)
+
+    def __ne__(self, other) -> bool:
+        if isinstance(other, str):
+            return self.string() != other
+        return super().__ne__(other)
+
+    def __len__(self) -> int:
+        return len(self.string())
+
+    def __repr__(self) -> str:
+        return f"BoardPiece({self.string()})"
 
 
 def load_all_bots() -> None:
@@ -37,7 +76,7 @@ def assert_move_in_bounds(board, move):
 
 def assert_move_is_valid_for_rules(player_sequence, board, move):
     assert_move_in_bounds(board, move)
-    assert move_is_valid(player_sequence, move, board), f"Illegal move: {move}"
+    assert move_is_valid(player_sequence, move, board, True), f"Illegal move: {move}"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -47,31 +86,37 @@ def _load_bots_once():
 
 @pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
 def test_bot_returns_correct_format_move(bot_name):
-    board = np.array([["pw", ""], ["", "pb"]])
+    board = np.array(
+        [[BoardPiece("p", "w"), ""], ["", BoardPiece("p", "b")]], dtype=object
+    )
     move = run_bot(bot_name, "0w01b2", board, 1)
     assert_move_in_bounds(board, move)
 
 
 @pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
 def test_bot_returns_legal_move_when_moves_exist(bot_name):
-    board = np.array([["pw"], [""], ["pb"]])
+    board = np.array(
+        [[BoardPiece("p", "w")], [""], [BoardPiece("p", "b")]], dtype=object
+    )
     move = run_bot(bot_name, "0w01b2", board, 1)
-    assert move == ((0, 0), (1, 0)), f"Move returned: {move}"
-    # TODO: Make board an array of ChessPieces to not raise error
-    # assert_move_is_valid_for_rules("0w01b2", board, move)
+    assert_move_is_valid_for_rules("0w01b2", board, move)
 
 
 @pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
 def test_bot_returns_current_pos_when_no_move(bot_name):
-    board = np.array([[""], ["pw"], ["pb"]])
+    board = np.array(
+        [[""], [BoardPiece("p", "w")], [BoardPiece("p", "b")]], dtype=object
+    )
     move = run_bot(bot_name, "0w01b2", board, 1)
-    assert move == ((1, 0), (1, 0)), f"Move returned: {move}"
-    # assert_move_is_valid_for_rules("0w01b2", board, move)
+    assert move == ((1, 0), (1, 0)), f"Invalid move: {move}"
 
 
 @pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
 def test_bot_avoid_loosing_queen(bot_name):
-    board = np.array([["qw"], [""], ["pb"], ["rb"]])
+    board = np.array(
+        [[BoardPiece("q", "w")], [""], [BoardPiece("p", "b")], [BoardPiece("r", "b")]],
+        dtype=object,
+    )
     move = run_bot(bot_name, "0w01b2", board, 3)
     assert move != ((0, 0), (2, 0)), f"Queen blundered into rook: {move}"
 
@@ -80,12 +125,33 @@ def test_bot_avoid_loosing_queen(bot_name):
 def test_bot_respect_time_budget(bot_name):
     board = np.array(
         [
-            ["rw", "nw", "bw", "qw"],
-            ["pw", "pw", "pw", "pw"],
+            [
+                BoardPiece("r", "w"),
+                BoardPiece("n", "w"),
+                BoardPiece("b", "w"),
+                BoardPiece("q", "w"),
+            ],
+            [
+                BoardPiece("p", "w"),
+                BoardPiece("p", "w"),
+                BoardPiece("p", "w"),
+                BoardPiece("p", "w"),
+            ],
             ["", "", "", ""],
-            ["pb", "pb", "pb", "pb"],
-            ["rb", "nb", "bb", "qb"],
-        ]
+            [
+                BoardPiece("p", "b"),
+                BoardPiece("p", "b"),
+                BoardPiece("p", "b"),
+                BoardPiece("p", "b"),
+            ],
+            [
+                BoardPiece("r", "b"),
+                BoardPiece("n", "b"),
+                BoardPiece("b", "b"),
+                BoardPiece("q", "b"),
+            ],
+        ],
+        dtype=object,
     )
 
     time_budget = 1
@@ -93,5 +159,21 @@ def test_bot_respect_time_budget(bot_name):
     move = run_bot(bot_name, "0w01b2", board, time_budget)
     t1 = time.perf_counter()
 
-    assert (t1 - t0) <= time_budget + 0.05, f"Took too long: {t1 - t0}s, move={move}"
+    assert (t1 - t0) <= time_budget, f"Took too long: {t1 - t0}s, move={move}"
     assert_move_in_bounds(board, move)
+
+
+@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+def test_bot_know_queen_upgrade(bot_name):
+    board = np.array(
+        [
+            ["", BoardPiece("r", "b"), "", "", ""],
+            ["", "", "", "", ""],
+            [BoardPiece("p", "w"), BoardPiece("p", "w"), "", "", BoardPiece("p", "b")],
+            [BoardPiece("k", "w"), "", "", "", ""],
+        ],
+        dtype=object,
+    )
+
+    move = run_bot(bot_name, "1b20w0", board, 1)
+    assert move == ((2, 4), (3, 4)), f"Wrong move: {move}"

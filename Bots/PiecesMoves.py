@@ -97,7 +97,9 @@ def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]
     # Maximum distance the piece can travel
     max_dist = 1 if piece_type not in can_move_k_cases else board.shape[0] - 1
 
-    moves = []
+    normal_moves = []
+    eat_moves = []
+    upgrade_moves = []
     for direction in dirs:
         for i in range(1, max_dist + 1):
             # Compute new positions
@@ -113,7 +115,12 @@ def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]
 
             # if case is empty, can move onto the case
             if len(case_content) == 0:
-                moves.append((nx, ny))
+                if piece_type != "p":
+                    normal_moves.append((nx, ny))
+                else:
+                    nx == board.shape[0] - 1
+                    upgrade_moves.append((nx, ny))
+
                 continue
 
             if case_content[1] == color:
@@ -121,7 +128,12 @@ def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]
 
             # If case contains a piece of same color, can't move onto the case
             if case_content[1] != color and piece_type != "p":
-                moves.append((nx, ny))
+                eat_moves.append(
+                    (
+                        (nx, ny),
+                        get_piece_value(case_content[1]) - get_piece_value(piece_type),
+                    )
+                )
                 break
 
     # If the piece to move is a pawn, can eat in specific conditions
@@ -144,6 +156,10 @@ def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]
 
             # If case contains a piece of same color, can't move onto the case
             if case_content[1] != color:
-                moves.append((nx, ny))
+                if nx < board.shape[0] - 1:
+                    eat_moves.append(((nx, ny), get_piece_value(case_content[0]) - 1))
+                else:
+                    upgrade_moves.append((nx, ny))
 
-    return moves
+    eat_moves.sort(key=lambda m: m[1])
+    return [m[0] for m in eat_moves] + upgrade_moves + normal_moves

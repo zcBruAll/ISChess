@@ -12,7 +12,7 @@ INF = 10**9
 def chess_bot(player_sequence, board, time_budget, **kwargs):
     color = player_sequence[1]
 
-    safety_time = 0.5
+    safety_time = 0.01
     deadline = time.perf_counter() + max(0, time_budget - safety_time)
 
     def evaluate(curr_board):
@@ -55,7 +55,11 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
 
         new_board = curr_board.copy()
 
-        new_board[tx][ty] = new_board[fx][fy]
+        piece = new_board[fx][fy]
+        if piece[0] == "p" and tx == curr_board.shape[0] - 1:
+            new_board[tx][ty] = "q" + piece[1]
+        else:
+            new_board[tx][ty] = piece
         new_board[fx][fy] = ""
 
         return new_board
@@ -68,7 +72,6 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
 
     def negamax(curr_board, depth_remaining, alpha, beta, side_to_move):
         if time_is_up():
-            print("max depth reached:", depth)
             raise SearchTimeout()
 
         sign = 1 if side_to_move == "w" else -1
@@ -142,6 +145,15 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
         while True:
             if time_is_up():
                 raise SearchTimeout
+            moves = get_all_moves(board, color)
+
+            if len(moves) == 0:
+                for x in range(board.shape[0]):
+                    for y in range(board.shape[1]):
+                        piece = board[x][y]
+                        if len(piece) > 0 and piece[1] == color:
+                            return (x, y), (x, y)
+                return (0, 0), (0, 0)
 
             best_move = find_best_move(board, color, depth)
             depth += 1
