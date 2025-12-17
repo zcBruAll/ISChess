@@ -117,9 +117,10 @@ def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]
             if len(case_content) == 0:
                 if piece_type != "p":
                     normal_moves.append((nx, ny))
-                else:
-                    nx == board.shape[0] - 1
+                elif nx == board.shape[0] - 1:
                     upgrade_moves.append((nx, ny))
+                else:
+                    normal_moves.append((nx, ny))
 
                 continue
 
@@ -131,7 +132,7 @@ def get_pieces_moves(position: Tuple[int, int], board) -> Sequence[Sequence[int]
                 eat_moves.append(
                     (
                         (nx, ny),
-                        get_piece_value(case_content[1]) - get_piece_value(piece_type),
+                        get_piece_value(case_content[0]) - get_piece_value(piece_type),
                     )
                 )
                 break

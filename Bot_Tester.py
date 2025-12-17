@@ -8,6 +8,8 @@ from Bots import __all__ as BOT_MODULES
 from Bots.ChessBotList import CHESS_BOT_LIST
 from ChessRules import move_is_valid, check_player_defeated
 
+bot_to_test = "ThinkR"
+
 
 @dataclass
 class BoardPiece:
@@ -84,7 +86,7 @@ def _load_bots_once():
     load_all_bots()
 
 
-@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+@pytest.mark.parametrize("bot_name", [bot_to_test])
 def test_bot_returns_correct_format_move(bot_name):
     board = np.array(
         [[BoardPiece("p", "w"), ""], ["", BoardPiece("p", "b")]], dtype=object
@@ -93,7 +95,7 @@ def test_bot_returns_correct_format_move(bot_name):
     assert_move_in_bounds(board, move)
 
 
-@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+@pytest.mark.parametrize("bot_name", [bot_to_test])
 def test_bot_returns_legal_move_when_moves_exist(bot_name):
     board = np.array(
         [[BoardPiece("p", "w")], [""], [BoardPiece("p", "b")]], dtype=object
@@ -102,7 +104,7 @@ def test_bot_returns_legal_move_when_moves_exist(bot_name):
     assert_move_is_valid_for_rules("0w01b2", board, move)
 
 
-@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+@pytest.mark.parametrize("bot_name", [bot_to_test])
 def test_bot_returns_current_pos_when_no_move(bot_name):
     board = np.array(
         [[""], [BoardPiece("p", "w")], [BoardPiece("p", "b")]], dtype=object
@@ -111,7 +113,7 @@ def test_bot_returns_current_pos_when_no_move(bot_name):
     assert move == ((1, 0), (1, 0)), f"Invalid move: {move}"
 
 
-@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+@pytest.mark.parametrize("bot_name", [bot_to_test])
 def test_bot_avoid_loosing_queen(bot_name):
     board = np.array(
         [[BoardPiece("q", "w")], [""], [BoardPiece("p", "b")], [BoardPiece("r", "b")]],
@@ -121,7 +123,7 @@ def test_bot_avoid_loosing_queen(bot_name):
     assert move != ((0, 0), (2, 0)), f"Queen blundered into rook: {move}"
 
 
-@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+@pytest.mark.parametrize("bot_name", [bot_to_test])
 def test_bot_respect_time_budget(bot_name):
     board = np.array(
         [
@@ -163,7 +165,7 @@ def test_bot_respect_time_budget(bot_name):
     assert_move_in_bounds(board, move)
 
 
-@pytest.mark.parametrize("bot_name", ["NegaMax_ThinkR"])
+@pytest.mark.parametrize("bot_name", [bot_to_test])
 def test_bot_know_queen_upgrade(bot_name):
     board = np.array(
         [

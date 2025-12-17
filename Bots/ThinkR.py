@@ -171,4 +171,4 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
     return best_move[0], best_move[1]
 
 
-register_chess_bot("NegaMax_ThinkR", chess_bot)
+register_chess_bot("ThinkR", chess_bot)
