@@ -4,7 +4,7 @@ import numpy as np
 import time
 from numpy.lib import _array_utils_impl
 from Bots.ChessBotList import register_chess_bot
-from Bots.PiecesMoves import get_pieces_moves, get_piece_value
+from Bots.PiecesMoves import get_all_moves, get_piece_value
 
 INF = 10**9
 
@@ -30,26 +30,6 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
                 score += value if piece[1] == "w" else -value
 
         return score
-
-    def get_all_moves(curr_board, side_color):
-        moves = []
-
-        for x in range(curr_board.shape[0]):
-            for y in range(curr_board.shape[1]):
-                piece = curr_board[x][y]
-
-                if len(piece) == 0:
-                    continue
-
-                if piece[1] != side_color:
-                    continue
-
-                from_pos = (x, y)
-
-                for nx, ny in get_pieces_moves(from_pos, curr_board):
-                    moves.append((from_pos, (nx, ny)))
-
-        return moves
 
     def apply_move(curr_board, move):
         (fx, fy), (tx, ty) = move
@@ -126,6 +106,8 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
         alpha = -INF
         beta = INF
 
+        score = -8974654
+
         for m in moves:
             if time_is_up():
                 raise SearchTimeout()
@@ -141,6 +123,8 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
 
             if score > alpha:
                 alpha = score
+
+        print(best_move, score)
 
         return best_move
 

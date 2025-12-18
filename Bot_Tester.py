@@ -119,8 +119,25 @@ def test_bot_avoid_loosing_queen(bot_name):
         [[BoardPiece("q", "w")], [""], [BoardPiece("p", "b")], [BoardPiece("r", "b")]],
         dtype=object,
     )
-    move = run_bot(bot_name, "0w01b2", board, 3)
+    move = run_bot(bot_name, "0w01b2", board, 1)
     assert move != ((0, 0), (2, 0)), f"Queen blundered into rook: {move}"
+
+
+@pytest.mark.parametrize("bot_name", [bot_to_test])
+def test_bot_want_to_win_too_much(bot_name):
+    board = np.array(
+        [
+            ["", BoardPiece("q", "b"), BoardPiece("k", "b")],
+            [BoardPiece("p", "b"), BoardPiece("p", "b"), BoardPiece("p", "b")],
+            ["", "", ""],
+            ["", BoardPiece("n", "w"), ""],
+            ["", "", ""],
+            ["", BoardPiece("k", "w"), ""],
+        ],
+        dtype=object,
+    )
+    move = run_bot(bot_name, "0w01b2", board, 1)
+    assert move != ((3, 1), (1, 0)) or move != ((3, 1), (1, 2)), f"Wrong move: {move}"
 
 
 @pytest.mark.parametrize("bot_name", [bot_to_test])
