@@ -143,8 +143,8 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
             best_move = find_best_move(board, color, depth)
             depth += 1
     except SearchTimeout:
-        print("Max depth:", depth)
-        print("Node visited:", total_node)
+        # print("Max depth:", depth)
+        # print("Node visited:", total_node)
         pass
 
     return best_move[0], best_move[1]

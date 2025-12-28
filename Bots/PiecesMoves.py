@@ -182,6 +182,6 @@ def get_all_moves(board, side_color) -> Sequence[Sequence[int]]:
                 print(board, x, y, board[x][y])
             get_pieces_moves((x, y), board)
 
-    eat_moves.sort(key=lambda m: m[1])
+    eat_moves.sort(key=lambda m: m[1], reverse=True)
     moves = [m[0] for m in eat_moves] + upgrade_moves + normal_moves
     return moves

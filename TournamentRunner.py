@@ -159,11 +159,11 @@ def play_match(
         ):
             # Any invalid move format counts as a forfeit
             print(f"Bot '{bot_name}' produced an invalid move format: {proposed_move}")
-            return endMatch(turn + 1, (-1) ** (player + 1))
+            continue
 
         if not move_is_valid(player_seq, proposed_move, player_board):
             print(f"Bot '{bot_name}' played an illegal move: {proposed_move}")
-            return endMatch(turn + 1, (-1) ** (player + 1))
+            continue
 
         apply_move(board, proposed_move, rotation)
 
@@ -207,6 +207,7 @@ def run_tournament(
         else:
             result[name_first] = {name_second: {"w": 0, "l": 0, "e": 0}}
 
+        print("---", name_first, "vs", name_second, "---")
         for i in range(nb_match):
             game_board = np.copy(board)
             winner = play_match(
