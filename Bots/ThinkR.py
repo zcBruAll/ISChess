@@ -14,6 +14,11 @@ pawn_eat_moves = [
     (1, 1),
 ]
 
+pawn_eat_moves_ennemy = [
+    (-1, -1),
+    (-1, 1),
+]
+
 rook_moves = [
     (0, -1),
     (0, 1),
@@ -72,6 +77,12 @@ pieces_moves = {
 
 can_move_k_cases = ["q", "b", "r"]
 
+bot_color = ""
+
+def setBotcolor(color):
+    global bot_color
+    bot_color = color
+
 
 def get_piece_value(piece: str) -> int:
     match piece:
@@ -84,9 +95,9 @@ def get_piece_value(piece: str) -> int:
         case "r":
             return 5
         case "q":
-            return 10
+            return 9
         case "k":
-            return 1000000
+            return 10
         case _:
             return 0
 
@@ -150,10 +161,11 @@ def get_all_moves(board, side_color) -> Sequence[Sequence[int]]:
 
         # If the piece to move is a pawn, can eat in specific conditions
         if piece_type == "p":
-            for direction in pawn_eat_moves:
+            directions = pawn_eat_moves if color == bot_color else pawn_eat_moves_ennemy
+            for dirs in directions:
                 # Compute new positions
-                nx = direction[0] + position[0]
-                ny = direction[1] + position[1]
+                nx = dirs[0] + position[0]
+                ny = dirs[1] + position[1]
 
                 # If out of board, skip move
                 if nx < 0 or nx >= board.shape[0] or ny < 0 or ny >= board.shape[1]:
@@ -221,7 +233,6 @@ def apply_move(curr_board, move):
     (fx, fy), (tx, ty) = move
 
     new_board = curr_board.copy()
-
     piece = new_board[fx][fy]
     if piece[0] == "p" and tx == curr_board.shape[0] - 1:
         new_board[tx][ty] = "q" + piece[1]
@@ -247,6 +258,7 @@ INF = 10**9
 
 def chess_bot(player_sequence, board, time_budget, **kwargs):
     color = player_sequence[1]
+    setBotcolor(color)
 
     safety_time = 0.01
     deadline = time.perf_counter() + max(0, time_budget - safety_time)
