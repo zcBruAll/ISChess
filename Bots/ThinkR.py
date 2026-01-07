@@ -14,11 +14,6 @@ pawn_eat_moves = [
     (1, 1),
 ]
 
-pawn_eat_moves_ennemy = [
-    (-1, -1),
-    (-1, 1),
-]
-
 rook_moves = [
     (0, -1),
     (0, 1),
@@ -76,12 +71,6 @@ pieces_moves = {
 }
 
 can_move_k_cases = ["q", "b", "r"]
-
-bot_color = ""
-
-def setBotcolor(color):
-    global bot_color
-    bot_color = color
 
 
 def get_piece_value(piece: str) -> int:
@@ -161,7 +150,7 @@ def get_all_moves(board, side_color) -> Sequence[Sequence[int]]:
 
         # If the piece to move is a pawn, can eat in specific conditions
         if piece_type == "p":
-            directions = pawn_eat_moves if color == bot_color else pawn_eat_moves_ennemy
+            directions = pawn_eat_moves
             for dirs in directions:
                 # Compute new positions
                 nx = dirs[0] + position[0]
@@ -258,7 +247,6 @@ INF = 10**9
 
 def chess_bot(player_sequence, board, time_budget, **kwargs):
     color = player_sequence[1]
-    setBotcolor(color)
 
     safety_time = 0.01
     deadline = time.perf_counter() + max(0, time_budget - safety_time)
@@ -306,7 +294,7 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
         best_score = -INF
 
         for m in moves:
-            child_board = apply_move(curr_board, m)
+            child_board = np.rot90(apply_move(curr_board, m), 2)
             next_side = "b" if side_to_move == "w" else "w"
 
             score = -negamax(child_board, depth_remaining - 1, -beta, -alpha, next_side)
@@ -347,7 +335,7 @@ def chess_bot(player_sequence, board, time_budget, **kwargs):
             if time_is_up():
                 raise SearchTimeout()
 
-            child = apply_move(curr_board, m)
+            child = np.rot90(apply_move(curr_board, m), 2)
 
             next_side = "b" if side_to_move == "w" else "w"
 
