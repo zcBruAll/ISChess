@@ -209,7 +209,7 @@ def is_king_safe(board, color):
 
     # Check if any enemy piece can attack the king
     enemy_color = "b" if color == "w" else "w"
-    enemy_moves = get_all_moves(board, enemy_color)
+    enemy_moves = get_all_moves(np.rot90(board, 2), enemy_color)
 
     for move in enemy_moves:
         if move[1] == king_pos:
